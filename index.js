@@ -91,7 +91,7 @@ function addclass(filepath, projectname, includefile) {
 	var readerpro1 = readline.createInterface({ input: streampro1 });
 	var classflag = false;
 	//var classtext = "";
-	var classtext = "@startuml \n folder " + filedirspt[filedirspt.length - 1] + "{\n";
+	var classtext = "@startuml "+filedirspt[filedirspt.length - 1]+"\nfolder " + filedirspt[filedirspt.length - 1] + "{\n";
 	readerpro1.on("line", (data) => {
 		if (data.match(/class (.+?)$/)) {
 			var d = data.match(/class (.+?): (.+?)$/);
@@ -101,61 +101,61 @@ function addclass(filepath, projectname, includefile) {
 			if (classflag) {
 				classtext += "\n}\n"
 			}
-			classtext += "class " + d[1] + "{\n";
+			classtext += "\tclass " + d[1] + "{\n";
 			classflag = true;
 		} else if (data.match(/(public|private|protected|package private) (.+?)\{(.+?)$/)) {
 			var d = data.match(/(public|private|protected|package private) (.+?)\{(.+?)$/);
 			if (d[1] == "public") {
-				classtext += "\t+";
+				classtext += "\t\t+";
 			} else if (d[1] == "private") {
-				classtext += "\t-";
+				classtext += "\t\t-";
 			} else if (d[1] == "protected") {
-				classtext += "\t#";
+				classtext += "\t\t#";
 			} else if (d[1] == "package private") {
-				classtext += "\t~";
+				classtext += "\t\t~";
 			}
 			classtext += d[2] + "\n";
 		} else if (data.match(/(public|private|protected|package private) (.+?) \=\> (.+?)$/)) {
 			var d = data.match(/(public|private|protected|package private) (.+?) \=\> (.+?)$/);
 			if (d[1] == "public") {
-				classtext += "\t+";
+				classtext += "\t\t+";
 			} else if (d[1] == "private") {
-				classtext += "\t-";
+				classtext += "\t\t-";
 			} else if (d[1] == "protected") {
-				classtext += "\t#";
+				classtext += "\t\t#";
 			} else if (d[1] == "package private") {
-				classtext += "\t~";
+				classtext += "\t\t~";
 			}
 			classtext += d[2] + "\n";
 		} else if (data.match(/(public|private|protected|package private) (.+?) \= (.+?)$/)) {
 			var d = data.match(/(public|private|protected|package private) (.+?) \= (.+?)$/);
 			if (d[1] == "public") {
-				classtext += "\t+";
+				classtext += "\t\t+";
 			} else if (d[1] == "private") {
-				classtext += "\t-";
+				classtext += "\t\t-";
 			} else if (d[1] == "protected") {
-				classtext += "\t#";
+				classtext += "\t\t#";
 			} else if (d[1] == "package private") {
-				classtext += "\t~";
+				classtext += "\t\t~";
 			}
 			classtext += d[2] + "\n";
 		} else if (data.match(/(public|private|protected) (.+?)$/)) {
 			var d = data.match(/(public|private|protected|package private) (.+?)$/);
 			if (d[1] == "public") {
-				classtext += "\t+";
+				classtext += "\t\t+";
 			} else if (d[1] == "private") {
-				classtext += "\t-";
+				classtext += "\t\t-";
 			} else if (d[1] == "protected") {
-				classtext += "\t#";
+				classtext += "\t\t#";
 			} else if (d[1] == "package private") {
-				classtext += "\t~";
+				classtext += "\t\t~";
 			}
 			classtext += d[2] + "\n";
 		}
 	}).on("close", () => {
 
 		if (classflag) {
-			fs.writeFileSync("outputpu\\" + filedirsp[filedirsp.length - 2] + "\\" + projectname + "\\" + includefile + ".pu", classtext + "}\n}\n@enduml");
+			fs.writeFileSync("outputpu\\" + filedirsp[filedirsp.length - 2] + "\\" + projectname + "\\" + includefile + ".pu", classtext + "\t}\n}\n@enduml");
 		} else {
 			fs.writeFileSync("outputpu\\" + filedirsp[filedirsp.length - 2] + "\\" + projectname + "\\" + includefile + ".pu", classtext + "}\n@enduml");
 		}
