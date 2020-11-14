@@ -1,5 +1,6 @@
 const fs = require("fs");
 const readline = require("readline");
+const { isObject } = require("util");
 const xml2json = require("xml2json");
 var filepath
 if (process.argv.length > 2) {
@@ -13,7 +14,7 @@ for (var i = 0; i < filedirsp.length - 1; i++) {
 	filedir = filedir + filedirsp[i] + '\\';
 }
 var text = "@startuml\nfolder " + filedirsp[filedirsp.length - 2] + "{\n";
-var project = /^Project\(.+?\) = \"(.+?)\", \"(.+?)\"/;
+var project = /^Project\(.+?\) = \"(.+?)\"(| ),(| )\"(.+?)\.csproj\", \"(.+?)\"/;
 var projects = new Array();
 var xaml = new Array();
 var strfile = new Array();
@@ -24,8 +25,8 @@ function loadsln() {
 	readerpro1.on("line", (data) => {
 		if (data.match(project)) {
 			var name = data.match(project)
-			projects.push(name[2]);
-			var str = fs.readFileSync(filedir + name[2], "utf-8",);
+			projects.push(name[4]);
+			var str = fs.readFileSync(filedir + name[4]+".csproj", "utf-8",);
 			var dom = xml2json.toJson(str);
 			var json = JSON.parse(dom);
 			xaml.push(json);
@@ -45,7 +46,7 @@ function sortingxml() {
 			fs.mkdirSync("outputpu\\" + filedirsp[filedirsp.length - 2] + "\\" + projects[i].split('\\')[0], { recursive: true })
 		}
 		var folder = projects[i].split("\\")[0];
-		if (xaml[i].Project.ItemGroup == undefined) continue;
+		if (xaml[i].Project.ItemGroup == undefined || xaml[i].Project.ItemGroup.length == undefined) continue;
 		xaml[i].Project.ItemGroup.forEach(element => {
 			for (elm in element) {
 				if (elm.match("Reference")) continue;
@@ -60,12 +61,12 @@ function sortingxml() {
 					if (fileex[fileex.length - 1] == "cs") {
 						addclass(filedir + folder + "\\" + element[elm].Include, projects[i].split('\\')[0], inc.Include)
 					}
-				} else {
+				} else if(element[elm].length>0 && typeof(element[elm]) == "object"){
 					element[elm].forEach(inc => {
 						if (inc.Include != undefined) {
-
 							var folsp = inc.Include.split("\\");
 							var fol = folsp.slice(0, folsp.length - 1)
+							console.log(inc)
 							if (!fs.existsSync("outputpu\\" + filedirsp[filedirsp.length - 2] + "\\" + projects[i].split('\\')[0] + "\\" + fol)) {
 								fs.mkdirSync("outputpu\\" + filedirsp[filedirsp.length - 2] + "\\" + projects[i].split('\\')[0] + "\\" + fol, { recursive: true })
 							}
@@ -153,7 +154,7 @@ function addclass(filepath, projectname, includefile) {
 			classtext += d[2] + "\n";
 		}
 	}).on("close", () => {
-
+		console.log("outputpu\\" + filedirsp[filedirsp.length - 2] + "\\" + projectname + "\\" + includefile + ".pu")
 		if (classflag) {
 			fs.writeFileSync("outputpu\\" + filedirsp[filedirsp.length - 2] + "\\" + projectname + "\\" + includefile + ".pu", classtext + "\t}\n}\n@enduml");
 		} else {
